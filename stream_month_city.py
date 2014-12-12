@@ -14,10 +14,18 @@ threadno=2
 class updatedb(threading.Thread):
    def run(self):
       dbaddr="127.0.0.1"
+      tab=mysql.connect(dbaddr,'ipv6bgp','ipv6','ipinformation',charset="utf8")
+      raw=mysql.connect(dbaddr,'ipv6bgp','ipv6','data',charset='utf8')
+      cur_tab=tab.cursor();
+      cur_tab.execute("set names 'utf8'")
+      cur_raw=raw.cursor();cur_raw.execute("set names 'utf8'")
+      #cur_tab=tab.cursor(); 
+      #cur_tab.execute("set names 'utf8'")
+      #cur_raw=raw.cursor();cur_raw.execute("set names 'utf8'");print "connDB"
       line=cur_tab.execute("select YM from streaming_month_city where id=(select max(id) \
-      from streaming_month_city where status='w')")
+      from streaming_month_city where status='w')");print line
       if line: 
-              YM=cur_tab.fetchone()[0]
+          YM=cur_tab.fetchone()[0]
       cur_tab.execute("commit")
       i=0
       while 1:
@@ -75,7 +83,6 @@ class updatedb(threading.Thread):
       tab.close()
 
 
-
 dbaddr="127.0.0.1"
 tab=mysql.connect(dbaddr,'ipv6bgp','ipv6','ipinformation',charset="utf8")
 raw=mysql.connect(dbaddr,'ipv6bgp','ipv6','data',charset='utf8')
@@ -86,16 +93,15 @@ reload(sys)
 sys.setdefaultencoding('utf8')
  # cur_tab.execute("select date_add(date, interval 1 day) from streaming_daily where id=(select max(id) from streaming_daily)")
   #date=cur_tab.fetchone()
-#month='201409'
 while 1 :
-  line=cur_tab.execute("select YM from streaming_month_city where id=(select max(id) from streaming_month_city)")
+  line=cur_tab.execute("select distinct max(YM) from streaming_month_city")
   month=cur_tab.fetchone()[0] #select the last year and month value in the table
   line=cur_tab.execute("select data.streaming.YM , data.streaming.id from data.streaming where id>(select max(data.streaming.id) \
   from data.streaming where data.streaming.YM='%s')+1 limit 1" % (month))
   # Select the last year and month id+1 from the rawdata, the month should be increase by one
-  ex=0 
+  ex=0; 
   if line : #any value?
-    YM=cur_tab.fetchone()[0]
+    YM=cur_tab.fetchone()[0]; 
     cur_tab.execute("select data.streaming.YM , data.streaming.id from data.streaming \
     where id=(select max(data.streaming.id) from data.streaming)")
     lastmonth=cur_tab.fetchone()[0]
@@ -122,9 +128,7 @@ while 1 :
      from data.streaming where (data.streaming.city!=''and data.streaming.city!='-') and data.streaming.YM='%s' and (status='b' or status='i') " %(month))
      results=cur_tab.fetchall()
      if line==0 :
-       cur_tab.close()
-       tab.close()
-       print "Empty DB"; exit(1)
+       print "Empty DB"; break
      for rslt in results: 
       try:
         cur_tab.execute("insert into streaming_month_city(name,province,city,YM,carrier) \
@@ -139,9 +143,9 @@ while 1 :
   for thrd in range(threadno) :
     print "Threading"
     th=updatedb()
-    th.start()    
+    th.start();time.sleep(1)    
   for thrd in range(threadno) : #strat multi-thread
-    th.join(); print thrd
+    th.join(); print thrd;time.sleep(1)
 cities=(u'天津市',u'上海市',u'重庆市',u'北京市')
 for city in cities :
      ret=cur_tab.execute("select id from region where name='%s' " %(city))
@@ -161,13 +165,16 @@ while 1 :
           cur_tab.execute("update streaming_month_city set code='%s' where id='%s'" % (rslt,results[0]))
       else :
           cur_tab.execute("update streaming_month_city set code=1 where id='%s'" % (results[0]))
-      cur_tab.execute("commit")
     else :
       cur_tab.execute("commit")
       break
   except mysql.Error, e:
-     print e
+     print e;
+  finally :
+     cur_tab.execute("commit")
+cur_raw.close()
 cur_tab.close()
+raw.close()
 tab.close()
 
 exit()
