@@ -38,7 +38,6 @@ if {$rightnow !=$sohuultime} {
 }
 #already processed
 #set YM "201410"
-puts start
 set results [mysqlsel $raw_data "select distinct name,province,prtcol,carrier from webbrowsing where prtcol='$YM' and (status='i' or status='b') and province <>''" -list]
 set i 0
 foreach rslt "$results" {
@@ -51,7 +50,7 @@ foreach rslt "$results" {
    if {$error} {
      puts $msg
   }
-  incr i ;puts $i 
+  incr i ;#puts $i 
 } 
 while {1} {
   set entryid [mysqlsel $mysql_handler "select id from firstscrn where status='n' order by rand() limit 1" -list]
@@ -83,7 +82,11 @@ while {1} {
   if {[lindex $query 0 1]=="" } {
      code=" "
   } else  {
-   set code [mysqlsel $raw_data "select id from region where name like '[lindex $query 0 1]%' and level=1" -list]
+   set code [mysqlsel $raw_data "select id from region where name like '[string range [lindex $query 0 1] 0 1]%' and level=1" -list]
+   if { $code =="" } {
+      code=1
+   }  
+     
    }
   set error [catch {mysqlexec $mysql_handler "update firstscrn set busy=$b_avg, busysample=$b_smpl, idle=$i_avg, idlesample=$i_smpl,status='c',code='$code'
      where id=$entryid"} msg]
