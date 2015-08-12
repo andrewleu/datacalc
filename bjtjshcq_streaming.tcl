@@ -32,7 +32,7 @@ if {$entry==0} {
      (data.streaming.province='天津' or data.streaming.province='天津市')or 
      (data.streaming.province='上海' or data.streaming.province='上海市') or
      (data.streaming.province='重庆' or data.streaming.province='重庆市')) and 
-     data.streaming.YM=$YM and data.streaming.day=$day and (status='o' or status='i')" -list]
+     data.streaming.YM=$YM and data.streaming.day=$day and (status='b' or status='i')" -list]
   foreach entry "$query" {
   set error [catch {mysqlexec $mysql_handler "insert into bjtjshcqstreaming(name,ipaddr, province,city,county,carrier,timestamp,os,
   term,software,s_rate,s_duration,watching, download,buffer,buffer_duration,status, YMD) values('[lindex $entry 0]',

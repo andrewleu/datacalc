@@ -7,7 +7,7 @@ set password {ipv6}
 set dbname {ipinformation} ;# calculated data
 set data {data} ;#raw data
 set mysql_handler [mysqlconnect -host $host -port $port -user $user -password $password]
-set raw_data  [mysqlconnect -host "map" -port "3306" -user "root" -password "chinangi"]
+set raw_data  [mysqlconnect -host "map" -port "3306" -user "root" -password "rtnet"]
 set rowid 1
 #起启数据库的行
 mysqlexec $mysql_handler "set names 'utf8'"

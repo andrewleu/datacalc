@@ -30,7 +30,7 @@ if { $entry==0 } {
      (data.download.addr='天津' or data.download.addr='天津市')or 
      (data.download.addr='上海' or data.download.addr='上海市') or
      (data.download.addr='重庆' or data.download.addr='重庆市')) and 
-     data.download.YM=$YM and data.download.day=$day and (status='o' or status='i')" -list]
+     data.download.YM=$YM and data.download.day=$day and (status='b' or status='i')" -list]
    foreach entry "$query" {
     set error [catch { mysqlexec $mysql_handler "insert into bj_tj_sh(ipaddr, addr,addr_2, addr_3,agency,date,max,avi,purpose,
      status,YMD) values('[lindex $entry 0]','[lindex $entry 1]','[lindex $entry 2]','[lindex $entry 3]','[lindex $entry 4]',
