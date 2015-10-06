@@ -1,3 +1,5 @@
+#to calculate download speed of a month 
+# it is editted by 2015 09
 #!/bin/python
 # -*- coding: UTF-8 -*-
 #calculcate a month for downloading speed, please revise ymd first
@@ -93,7 +95,7 @@ cur_tab.execute("set names 'utf8'")
 reload(sys)
 sys.setdefaultencoding('UTF-8')
 threadno=6
-#telco1=u"\u7535\u4fe1"; telco2=u"\u8054\u901a";telco3=u"\u79fb\u52a8";
+telco1=u"\u7535\u4fe1"; telco2=u"\u8054\u901a";telco3=u"\u79fb\u52a8";
 line=(cur_tab.execute("select YMD from carriers where status='w' limit 1"))
 if line==0:
   #cur_tab.execute("select YMD from carriers where id=(select max(id) from carriers)")
@@ -102,13 +104,15 @@ if line==0:
  #// ymd= ymd+delta
   #//ymd=ymd.isoformat()
   #//ymd=ymd.strip().replace('-','')
-  yandm='201507';#//day=ymd[6:8]   
+  yandm='201509';#//day=ymd[6:8]   
   expt=0 
   try: # empty table
      cur_tab.execute("select distinct data.`download`.`agency` AS `agency`,data.`download`.`addr` AS `addr`,\
         data.`download`.`addr_2` AS `addr_2`,data.`download`.`purpose` AS `purpose` \
         from data.`download` where (data.`download`.`YM` = '%s'  and \
-        (data.download.status='i' or data.download.status='b'))" % (int(yandm)))
+        (data.download.status='i' or data.download.status='b') and \
+        (agency='%s' or agency='%s' or agency='%s')\
+        )" % (int(yandm),telco1, telco2,telco3))
      results=cur_tab.fetchall()
      for rslt in results :
        cur_tab.execute("insert into carriers(subcarrier, addr, addr_2, enterprise) \
@@ -121,23 +125,23 @@ if line==0:
   if expt==1 :
      exit()
  #insert area code                                                                                                     
-  while 1 :                                                                                                       
+  while 1 :                                                                                        
     line=(cur_tab.execute("select id, addr, addr_2 from carriers where code=0 or code is NULL order by rand() limit 1"))    
-    if line==0 :                                                                                                  
-           break;                                                                                                 
-    readline=cur_tab.fetchone();#print readline                                                                   
-    if readline[2]=="-" or  readline[2]=='' :                                                                               
-        line=(cur_tab.execute( "select id from region where name like '%s' and level=1" % (readline[1]+'%')))     
-        if line!=0 :                                                                                              
+    if line==0 :                                                                                    
+           break;                                                                                    
+    readline=cur_tab.fetchone();#print readline                                                     
+    if readline[2]=="-" or  readline[2]=='' :                                                       
+        line=(cur_tab.execute( "select id from region where name like '%s' and level=1" % (readline[1][0:2]+'%')))     
+        if line!=0 :                                                                                
            cur_tab.execute("update carriers set code ='%s' where id = '%s' " % (cur_tab.fetchone()[0],readline[0]))   
-    else :                                                                                                    
-        if len(readline[2])>=5 :                                                                                 
-               addr=readline[2][0:5]                                                                             
+    else :                                                                                          
+        if len(readline[2])>=5 :                                                                     
+               addr=readline[2][0:5]                                                                 
                line=(cur_tab.execute("select id from region where name like '%s' and level=2" % (addr+'%')))                
-               if line!=0 :                                                                                      
+               if line!=0 :                                                                         
                  cur_tab.execute("update carriers set code ='%s' where id='%s' " % (cur_tab.fetchone()[0],readline[0]))
                else :
-                  line=cur_tab.execute("select id from region where name like '%s' and level=1" % (readline[1]+'%'))
+                  line=cur_tab.execute("select id from region where name like '%s' and level=1" % (readline[1][0:2]+'%'))
                   if line!=0 :
                       cur_tab.execute("update carriers set code ='%s' where id='%s' " % (cur_tab.fetchone()[0],readline[0]))
                   else :
@@ -147,7 +151,7 @@ if line==0:
                if line!=0 :                                                                                      
                  cur_tab.execute("update carriers set code ='%s' where id='%s'" % (cur_tab.fetchone()[0],readline[0]))
                else :
-                  line=cur_tab.execute("select id from region where name like '%s' and level=1" % (readline[1]+'%'))
+                  line=cur_tab.execute("select id from region where name like '%s' and level=1" % (readline[1][0:2]+'%'))
                   if line!=0 :
                       cur_tab.execute("update carriers set code ='%s' where id='%s' " % (cur_tab.fetchone()[0],readline[0]))
                   else :
